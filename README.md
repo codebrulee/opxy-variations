@@ -20,7 +20,7 @@ A variation has a **window** — a position and a length in bars, anywhere aroun
 the join it is pinned to — and up to **three lanes**. Each lane moves one
 target on its own tracks:
 
-|||
+| In each lane | What you can choose |
 | --- | --- |
 | **Targets** | A track's volume, cutoff, resonance, LFO speed and amount, envelope stages, the sends, or any control of its engine, chosen by name so the lane follows that control wherever a track's engine keeps it |
 | **Gestures** | fade in, fade out, rise, fall, swell, dip, build, break, drop, cut in, gate and stutter (a note retrigger), each with an amount and a curve |
@@ -40,7 +40,7 @@ is the unit the OP-XY moves things in. A lane is one knob plus the tracks it
 moves, so a lane across all eight tracks is eight controls, and a variation
 using all three lanes across all eight tracks is 24.
 
-|||
+| Limit | Value |
 | --- | --- |
 | Variations in a project | **64** |
 | Saved state | **8192 bytes**; an ordinary variation costs 30 |
