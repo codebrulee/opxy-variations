@@ -1,0 +1,23 @@
+{"variations": [
+ {"song": 1, "entry": 2, "offset": -32, "length": 32, "lanes": [{"gesture": "build", "amount": 128, "tracks": [1, 2, 3], "default_tracks": true}, {"gesture": "rise", "amount": 255, "target": "cutoff", "tracks": [4, 5], "default_target": false}]},
+ {"song": 2, "entry": 3, "offset": -32, "length": 64, "lanes": [{"gesture": "break", "amount": 255, "tracks": [1, 2, 3, 4]}, {"gesture": "fall", "amount": 128, "target": "lfo speed", "tracks": [6], "default_target": false}]},
+ {"song": 3, "entry": 4, "offset": 0, "length": 8, "lanes": [{"gesture": "break", "amount": 0, "tracks": [8]}]},
+ {"song": 1, "entry": 5, "offset": -32, "length": 32, "lanes": [{"gesture": "drop", "amount": 128, "tracks": [1, 2, 3, 4, 5, 6, 7, 8], "default_tracks": true}, {"gesture": "swell", "amount": 200, "target": "fx i send", "tracks": [3, 4], "default_target": false}]},
+ {"song": 2, "entry": 6, "offset": -8, "length": 8, "lanes": [{"gesture": "drop", "amount": 255, "target": "notes", "tracks": [2], "default_target": false}, {"gesture": "dip", "amount": 255, "target": "release", "tracks": [7], "default_target": false}]},
+ {"song": 3, "entry": 7, "offset": 16, "length": 16, "lanes": [{"gesture": "swell", "amount": 0, "tracks": [3]}, {"gesture": "none"}]},
+ {"song": 1, "entry": 8, "offset": -128, "length": 128, "lanes": [{"gesture": "rise", "amount": 255, "tracks": [5]}, {"gesture": "build", "amount": 0, "target": "param 2", "tracks": [1, 2], "default_target": false}]},
+ {"song": 2, "entry": 9, "offset": -16, "length": 32, "lanes": [{"gesture": "fall", "amount": 128, "tracks": [5, 6]}, {"gesture": "dip", "amount": 64, "target": "pan", "tracks": [8], "default_target": false}]},
+ {"song": 1, "entry": 10, "offset": -64, "length": 64, "lanes": [{"gesture": "build", "amount": 255, "tracks": [1, 2, 3, 4], "curve": 90}, {"gesture": "break", "amount": 200, "tracks": [5, 6, 7, 8], "curve": -70}]},
+ {"song": 2, "entry": 11, "offset": -32, "length": 32, "lanes": [{"gesture": "rise", "amount": 255, "target": "volume", "tracks": [1], "default_target": false, "curve": -30}, {"gesture": "swell", "amount": 255, "target": "cutoff", "tracks": [2], "default_target": false, "curve": 64}]},
+ {"song": 3, "entry": 12, "offset": -32, "length": 32, "lanes": [{"gesture": "fall", "amount": 128, "tracks": [3], "curve": 0}, {"gesture": "dip", "amount": 128, "target": "cutoff", "tracks": [4], "default_target": false, "curve": 127}]},
+ {"song": 1, "entry": 13, "offset": 0, "length": 32, "lanes": [{"gesture": "fade in", "amount": 255, "tracks": [1, 2], "default_tracks": true}, {"gesture": "fade out", "amount": 128, "tracks": [3]}]},
+ {"song": 2, "entry": 14, "offset": -16, "length": 16, "lanes": [{"gesture": "fade out", "amount": 255, "tracks": [4], "curve": 30}, {"gesture": "fade in", "amount": 128, "target": "volume", "tracks": [5], "curve": -50}]},
+ {"song": 1, "entry": 15, "offset": -32, "length": 32, "lanes": [{"gesture": "random", "amount": 200, "tracks": [1, 2]}, {"gesture": "wander", "amount": 255, "tracks": [3]}]},
+ {"song": 2, "entry": 16, "offset": -128, "length": 128, "lanes": [{"gesture": "random", "amount": 255, "tracks": [1]}, {"gesture": "wander", "amount": 0, "tracks": [2]}]},
+ {"song": 3, "entry": 17, "offset": -16, "length": 16, "lanes": [{"gesture": "cut in", "amount": 128, "tracks": [1, 2, 3], "default_tracks": true}, {"gesture": "gate", "amount": 255, "tracks": [4]}]},
+ {"song": 1, "entry": 18, "offset": -32, "length": 32, "lanes": [{"gesture": "gate", "amount": 0, "tracks": [1]}, {"gesture": "cut in", "amount": 255, "tracks": [2]}]},
+ {"song": 2, "entry": 19, "offset": -16, "length": 32, "lanes": [{"gesture": "stutter", "amount": 128, "tracks": [1, 2]}, {"gesture": "gate", "amount": 200, "tracks": [3]}]},
+ {"song": 3, "entry": 20, "offset": 0, "length": 256, "lanes": [{"gesture": "random", "amount": 200, "tracks": [1, 2]}, {"gesture": "wander", "amount": 255, "tracks": [3]}]},
+ {"song": 1, "entry": 21, "offset": 64, "length": 192, "lanes": [{"gesture": "gate", "amount": 255, "tracks": [1]}, {"gesture": "stutter", "amount": 100, "tracks": [2]}]},
+ {"song": 2, "entry": 22, "offset": 0, "length": 8, "lanes": [{"gesture": "hold", "amount": 255, "tracks": [1]}, {"gesture": "hold", "amount": 128, "target": "cutoff", "tracks": [2]}]}
+]}

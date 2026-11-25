@@ -1,0 +1,8 @@
+{"variations": [
+ {"song": 1, "entry": 2, "offset": -16, "length": 16, "lanes": [
+  {"gesture": "break", "amount": 200, "target": "volume", "tracks": [1, 2], "default_tracks": true, "default_target": true},
+  {"gesture": "rise", "amount": 128, "target": "cutoff", "tracks": [3, 4], "default_target": false}]},
+ {"song": 2, "entry": 1, "offset": 4, "length": 64, "lanes": [
+  {"gesture": "fall", "amount": 255, "target": "cutoff", "tracks": [3, 6, 7, 8], "default_target": true},
+  {"gesture": "dip", "amount": 100, "target": "release", "tracks": [1], "default_target": false}]}
+]}

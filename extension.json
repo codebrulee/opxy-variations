@@ -1,0 +1,29 @@
+{
+  "id": "variations",
+  "name": "Variations",
+  "description": "A few bars of change over a song, in two lanes: tracks fade, break and build, or any of their sounds' controls rises, falls, swells or dips.",
+  "claims": [
+    "song_page_m4"
+  ],
+  "actions": [
+    "track_values",
+    "read_notes",
+    "play_notes",
+    "read_song",
+    "notify"
+  ],
+  "savedBytes": 8192,
+  "songMarks": true,
+  "page": {
+    "artwork": "variations_page.svg",
+    "opens": "song_page_m4",
+    "label": "variation",
+    "display": {
+      "paths": 4,
+      "points": 64,
+      "nodes": 234,
+      "texts": 16,
+      "palette": 16
+    }
+  }
+}

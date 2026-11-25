@@ -1,0 +1,4 @@
+{"variations": [
+ {"song": 1, "entry": 2, "offset": 0, "length": 32, "lanes": [
+  {"gesture": "build", "amount": 255, "tracks": [1, 2]}]}
+]}

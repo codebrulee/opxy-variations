@@ -1,0 +1,9 @@
+{"variations": [
+ {"song": 2, "entry": 3, "offset": -32, "length": 32, "gesture": "build", "amount": 200,
+  "tracks": [1, 2, 3], "default_tracks": true,
+  "lines": [
+   {"track": 1, "line": "level", "points": [{"step": 0, "value": 0}, {"step": 31, "value": 255, "curve": -40}]},
+   {"track": 2, "line": "notes", "points": [{"step": 16, "value": 128}]}]},
+ {"song": 1, "entry": 1, "offset": 16, "length": 16, "gesture": "custom", "amount": 0,
+  "tracks": [8], "lines": [{"track": 8, "line": "filter", "points": [{"step": 15, "value": 10}]}]}
+]}
