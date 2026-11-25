@@ -1,7 +1,7 @@
 {
   "id": "variations",
   "name": "Variations",
-  "description": "A few bars of change over a song, in three lanes: tracks fade, break and build, or any of their sounds' controls rises, falls, swells or dips.",
+  "description": "Adds variations to song mode: three lanes of assignable LFO like transitions over time between scenes, independent of the scene itself.",
   "claims": [
     "song_page_m4"
   ],
