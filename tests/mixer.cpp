@@ -38,11 +38,14 @@ static void drive(u32 track, u32 word, u32 value) {
             tg.drive[i].value = value;
             return;
         }
-    tg.drive[tg.count++] = Drive{static_cast<u8>(track), static_cast<u8>(word), value};
+    tg.add(track, word, value);
 }
 static void stop(u32 track, u32 word) {
     for (u32 i = 0; i < tg.count; ++i)
-        if (tg.drive[i].track == track && tg.drive[i].word == word) tg.drive[i] = tg.drive[--tg.count];
+        if (tg.drive[i].track == track && tg.drive[i].word == word) {
+            tg.drive[i] = tg.drive[--tg.count];
+            tg.asked[track][word >> 5] &= ~(1u << (word & 31));
+        }
 }
 static const u32 kTop = 255 << 8, kBottom = 0;
 int main() {
@@ -128,7 +131,7 @@ int main() {
     require(sends == before && !mixer.ours(2, 11), "already the longest: nothing to send");
 
     // Two lanes on different tracks and targets: each word its own.
-    tg.count = 0;
+    tg.clear();
     mixer.apply(tg, io);
     drive(3, kVolume, kBottom);  // lane a: a break on track 4
     drive(5, kCutoff, kTop);     // lane b: a rise on track 6's cutoff
@@ -159,16 +162,17 @@ int main() {
     mixer.release(io);
     require(sends == after, "release twice: nothing more");
 
-    // Budget: the SDK sends 32 a pass. 32 words driven at once go in one pass;
-    // giving them back while others start takes a second pass, nothing lost.
-    tg.count = 0;
+    // Budget: the SDK sends 32 a callback. 32 words driven at once go in one
+    // pass; giving them back while others start takes a second pass, nothing
+    // lost. The asks themselves are not bounded by that budget (kMaxDrives).
+    tg.clear();
     for (u32 t = 0; t < kTracks; ++t)
         for (u32 w : {kVolume, kCutoff, kSend, 24u}) drive(t, w, kTop);
-    require(tg.count == kMaxDrives, "32 words");
+    require(tg.count == 32, "32 words");
     budget = 32;
     mixer.apply(tg, io);
     require(!budget && mixer.ours(7, 24), "all 32 in one pass");
-    tg.count = 0;
+    tg.clear();
     for (u32 t = 0; t < kTracks; ++t) drive(t, 11, kTop);  // 8 new words, 32 to give back
     budget = 32;
     mixer.apply(tg, io);
@@ -183,24 +187,25 @@ int main() {
     {
         struct Has { static bool has(u32 t, u32 w) { return !(t == 0 && w < 4); } };  // track 1: a drum engine, no slots
         const TrackIo mixed = {io_read, io_filter, io_send, Has::has};
-        tg.count = 0;
+        tg.clear();
         mixer.apply(tg, io), mixer.apply(tg, io);  // everything given back first
         for (u32 t = 0; t < 3; ++t) gui[t][0] = dsp[t][0] = 0x40000000;
-        tg.count = 0;
+        tg.clear();
         drive(0, 0, kTop), drive(2, 0, kTop);
         budget = 32;
         mixer.apply(tg, mixed);
         require(dsp[0][0] == 0x40000000 && !mixer.ours(0, 0), "track 1, no such slot: left alone");
         require(dsp[2][0] == kFull && mixer.ours(2, 0), "track 3's own first control moved");
-        tg.count = 0;
+        tg.clear();
         mixer.apply(tg, mixed);
         require(dsp[2][0] == 0x40000000, "and given back");
     }
-    // Build 060 (version 11): three lanes move up to 3 x 8 = 24 words in a pass, within the SDK's 32 sends a
-    // callback (window.hpp kMaxDrives, which also caps a pass with several variations playing at once). Asserted
-    // on the real lanes through the real mixer: every send call of the pass is counted, and none is past 32.
+    // Build 060 (version 11): three lanes ask for up to 3 x 8 = 24 words in a pass. Several variations overlapping
+    // ask for more, and the list holds every distinct ask (window.hpp kMaxDrives is every ask there is, so it cannot
+    // fill); what the SDK's 32 sends a callback bounds is the sending, and a word it refuses goes on the next pass.
+    // Asserted on the real lanes through the real mixer: every send call of the pass is counted, and none is past 32.
     {
-        tg.count = 0;
+        tg.clear();
         mixer.apply(tg, io), mixer.apply(tg, io);  // everything given back first
         for (u32 t = 0; t < kTracks; ++t)
             for (u32 w : {kVolume, kCutoff, kSend, 8u, 9u, 10u, 11u, 24u, 25u}) gui[t][w] = dsp[t][w] = 0x40000000;
@@ -226,7 +231,7 @@ int main() {
         budget = 32;  // the SDK's 32 a callback
         const u32 before = sends;
         mixer.apply(tg, counted);
-        require(calls <= 32 && calls == 24 && sends - before == 24 && budget == 8, "three lanes: 24 sends in the pass, within 32");
+        require(calls == 24 && sends - before == 24 && budget == 8, "three lanes: 24 sends in the pass, within 32");
         // A second variation on the same window with other words (volume stays taken: the first lane to ask holds it):
         // the words wanted stop at kMaxDrives however many lanes ask.
         Draft e = {};
@@ -236,10 +241,17 @@ int main() {
         lanes(f, 0, 8, 9, 10);
         store.put(2, f);
         targets(store, pos, &tg);
-        require(tg.count == kMaxDrives, "several variations: capped at kMaxDrives (48 words asked, 32 taken)");
+        require(tg.count == 9 * kTracks, "three variations: all 72 words asked, none dropped");
         calls = 0, budget = 32;
+        const u32 before_all = sends;
         mixer.apply(tg, counted);
-        require(calls <= 32, "never more than 32 send calls in a pass");
+        // 33 calls, not 72: the refused one stops the rest being asked for.
+        require(calls == 33 && sends - before_all == 32, "the pass sends 32 and stops at the refusal");
+        // What the budget refused is not lost: the next passes send the rest.
+        for (u32 pass = 0; pass < 3; ++pass) calls = 0, budget = 32, mixer.apply(tg, counted);
+        for (u32 t = 0; t < kTracks; ++t)
+            for (u32 w : {kVolume, kCutoff, kSend, 8u, 9u, 10u, 11u, 24u, 25u})
+                require(mixer.ours(t, w), "every word asked reaches the board within a few passes");
     }
     std::puts("variations mixer: ok");
     return 0;

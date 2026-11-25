@@ -242,7 +242,7 @@ void sequencer_pass(const Context& c, const Actions& a) {
         // Build 052: except the volumes a lane held silent (see SilentHold),
         // which stay held until a note is played or the backstop. A count-in
         // (Play pressed again) takes over with its own start targets.
-        targets_now.count = 0;
+        targets_now.clear();
         const Engines engines = pass_engines();
         if (c.playing && start.known) {
             silent_hold.clear();

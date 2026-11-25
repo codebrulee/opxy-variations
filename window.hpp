@@ -168,9 +168,19 @@ const u32 kSilent = 2 << 8;  // Q8: under 1 % of as set
 // middle "as set"), and per track the notes line's. Where two lanes (of one
 // variation, or of two whose windows overlap) drive the same word of a track,
 // the one met first decides: variations in store order, lane A before B before C.
-// Build 060 (version 11): three lanes on eight tracks ask 24 words, within the cap; the cap holds however many
-// variations play at once (tests/mixer.cpp counts the send calls of a pass).
-const u32 kMaxDrives = 32;  // the SDK's sends a pass
+//
+// This list holds what the lanes *ask*, not what is sent: the mixer sends a
+// word only when its value changes, which is about three a pass and never more
+// than the SDK's budget for one callback (a word whose send that budget refuses
+// goes on the next pass instead, 1.45 ms later). So the list is sized to the
+// most a song can ask for rather than to that budget: a track's word may be
+// asked for only once, so eight tracks of the SDK's 28 drivable words is every
+// distinct ask there is, and the list cannot fill however many variations
+// overlap.
+const u32 kMaxDrives = kTracks * opxy::extensions::track_target_count;  // 224: every ask there is
+// Words are the SDK's indices, under 58. One bit each, so the duplicate check
+// that runs for every lane and track is a test rather than a walk of the list.
+const u32 kWordBits = 64;
 struct Drive {
     u8 track, word;
     u32 value;
@@ -180,8 +190,26 @@ struct Targets {
     Drive drive[kMaxDrives];
     u32 notes[kTracks];
     bool notes_set[kTracks];
-    // The value asked of a track's word, or false.
+    u32 asked[kTracks][kWordBits / 32];
+    // Whether a track's word has been asked for already.
+    bool taken(u32 track, u32 word) const { return asked[track][word >> 5] >> (word & 31) & 1; }
+    // Add a track's word, unless it is taken or the list is full (it cannot be).
+    void add(u32 track, u32 word, u32 value) {
+        if (taken(track, word) || count >= kMaxDrives) return;
+        asked[track][word >> 5] |= 1u << (word & 31);
+        drive[count++] = Drive{static_cast<u8>(track), static_cast<u8>(word), value};
+    }
+    void clear() {
+        count = 0;
+        for (u32 t = 0; t < kTracks; ++t) {
+            notes_set[t] = false, notes[t] = 0;
+            asked[t][0] = asked[t][1] = 0;
+        }
+    }
+    // The value asked of a track's word, or false. Not on the per-pass path:
+    // the duplicate check uses taken(), this is for a single lookup.
     bool find(u32 track, u32 word, u32* value) const {
+        if (!taken(track, word)) return false;
         for (u32 i = 0; i < count; ++i)
             if (drive[i].track == track && drive[i].word == word) return *value = drive[i].value, true;
         return false;
@@ -255,10 +283,9 @@ inline void ease_targets(const Store& store, const SongPosition& s, u32 ease, Ta
             const Point* p = store.points(v, n, &count);
             if (!p) continue;
             for (u32 t = 0; t < kTracks; ++t) {
-                u32 held;
-                if (!(l.selection >> t & 1) || out->count >= kMaxDrives) continue;
+                if (!(l.selection >> t & 1)) continue;
                 const i32 word = lane_word(store, v, n, t, engines);
-                if (word < 0 || out->find(t, static_cast<u32>(word), &held)) continue;
+                if (word < 0 || out->taken(t, static_cast<u32>(word))) continue;
                 const u32 shift = stagger(l.gesture, l.amount, l.curve, l.selection, t, v.length);
                 const u32 edge = value_late(p, count, before ? 0 : static_cast<u32>(span - 1), shift, 1, v.length);  // build 049: length for the stretch
                 u32 value;
@@ -272,7 +299,7 @@ inline void ease_targets(const Store& store, const SongPosition& s, u32 ease, Ta
                     if (done > length) continue;  // arrives at as set on done == length, exactly
                     value = eased(edge, kMiddle, done, length);
                 }
-                out->drive[out->count++] = Drive{static_cast<u8>(t), static_cast<u8>(word), value};
+                out->add(t, static_cast<u32>(word), value);
             }
         }
     }
@@ -282,8 +309,7 @@ inline void ease_targets(const Store& store, const SongPosition& s, u32 ease, Ta
 // null: by slot, and a control by name moves nothing (the notes' check, which
 // asks only the volume and the notes).
 inline void targets(const Store& store, const SongPosition& s, Targets* out, u32 ease = 0, const Engines* engines = nullptr, u32 ease_out = 0) {
-    out->count = 0;
-    for (u32 t = 0; t < kTracks; ++t) out->notes_set[t] = false, out->notes[t] = 0;
+    out->clear();
     for (u32 i = 0; i < store.count(); ++i) {
         const Variation& v = store[i];
         u32 at;
@@ -301,7 +327,6 @@ inline void targets(const Store& store, const SongPosition& s, Targets* out, u32
             // Every track of the lane follows its one line (build and break
             // one after another: stagger.hpp).
             for (u32 t = 0; t < kTracks; ++t) {
-                u32 held;
                 if (!(l.selection >> t & 1)) continue;
                 // Build 044: gate's stored bar repeats every bar of the window.
                 const u32 rate = l.gesture == kGestureGate ? l.rate * stutter_scale(v.length) : l.rate;
@@ -310,10 +335,9 @@ inline void targets(const Store& store, const SongPosition& s, Targets* out, u32
                     if (out->notes_set[t]) continue;
                     out->notes[t] = value;
                     out->notes_set[t] = true;
-                } else if (out->count < kMaxDrives) {
+                } else {
                     const i32 word = lane_word(store, v, n, t, engines);
-                    if (word >= 0 && !out->find(t, static_cast<u32>(word), &held))
-                        out->drive[out->count++] = Drive{static_cast<u8>(t), static_cast<u8>(word), value};
+                    if (word >= 0) out->add(t, static_cast<u32>(word), value);
                 }
             }
         }

@@ -36,10 +36,9 @@ opening anything.
 ## Limits
 
 A **control** is one knob on one track: track 1's volume, track 3's cutoff. It
-is the unit the OP-XY moves things in, and the one the limits below count. A
-lane is one knob plus the tracks it moves, so a lane across all eight tracks is
-eight controls, and a variation using all three lanes across all eight tracks
-is 24.
+is the unit the OP-XY moves things in. A lane is one knob plus the tracks it
+moves, so a lane across all eight tracks is eight controls, and a variation
+using all three lanes across all eight tracks is 24.
 
 | | |
 | --- | --- |
@@ -49,15 +48,16 @@ is 24.
 | Joins a window may reach, each way | 95 |
 | Lanes a variation | 3 |
 | Points on a drawn line | 32 |
-| Controls moving at once | **32**, the OP-XY's own ceiling |
 
-Every limit but the last is one you would have to go looking for. The last one
-you can meet by accident, so it is worth knowing how.
+There is no limit on how many controls move at once, however many variations
+overlap. A control is only ever moved by one lane, so the most anything can ask
+for is every control of every track, and there is room for all of them.
 
-One variation asks for 24 controls at the very most, so on its own it always
-fits. But two variations over the same bars ask for both their sets at once —
-up to 48 between them, where only 32 can move. The sixteen over the ceiling do
-not move, and today nothing tells you: a fade you set up simply does not fade.
+The OP-XY takes at most 32 changed values in one go, which is the only thing
+near a ceiling here. A control whose change does not fit goes on the next pass
+instead, about one and a half thousandths of a second later, so nothing is lost
+and nothing is heard. In ordinary playing about three controls change in a
+pass; twenty overlapping variations reach the 32 on roughly one pass in eight.
 
 ## Checks
 

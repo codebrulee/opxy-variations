@@ -68,12 +68,18 @@ public:
     // Every pass: send what the targets ask; give back what they no longer do.
     void apply(const Targets& t, const TrackIo& io) {
         for (Slot& s : slots_) s.wanted = false;
+        // Once a send is refused every later one this pass is too (the pass's
+        // sends are spent, or a project is loading), so stop asking: the words
+        // left keep what they hold and go on the next pass, 1.45 ms later.
+        // Their slots stay used and not ours-less, so nothing is given back.
+        bool spent = false;
         for (u32 i = 0; i < t.count; ++i) {
             const Drive& d = t.drive[i];
             if (d.word < opxy::extensions::engine_words && io.has && !io.has(d.track, d.word)) continue;
             Slot* s = find(d.track, d.word, true);
             if (!s) continue;
             s->wanted = true;
+            if (spent) continue;
             i32 own;
             if (!io.read(d.track, d.word, &own)) continue;
             bool driven = true;
@@ -82,12 +88,12 @@ public:
                 bool on;
                 driven = io.filter(d.track, &type, &on) && on && type != kFilterDynamic;
             }
-            send(*s, driven ? word_value(d.word, d.value, own) : own, own, io);
+            if (!send(*s, driven ? word_value(d.word, d.value, own) : own, own, io)) spent = true;
         }
         for (Slot& s : slots_) {
-            if (!s.used || s.wanted) continue;
+            if (!s.used || s.wanted || spent) continue;
             i32 own;
-            if (io.read(s.track, s.word, &own)) send(s, own, own, io);
+            if (io.read(s.track, s.word, &own) && !send(s, own, own, io)) spent = true;
             if (!s.ours) s.used = false;
         }
     }
@@ -131,15 +137,19 @@ private:
         free->used = true, free->track = static_cast<u8>(track), free->word = static_cast<u8>(word);
         return free;
     }
-    void send(Slot& s, i32 value, i32 own, const TrackIo& io) {
-        if (!s.ours && value == own) return;  // stock's own value stands
-        if (s.ours && value == s.sent && own == s.own && !s.stale) return;
-        if (!io.send(s.track, s.word, value)) return;  // a project loads, or the pass's sends are spent: next pass
+    // False when the send was refused: a project loads, or the pass's sends are
+    // spent. True when it went, and when there was nothing to send.
+    bool send(Slot& s, i32 value, i32 own, const TrackIo& io) {
+        if (!s.ours && value == own) return true;  // stock's own value stands
+        if (s.ours && value == s.sent && own == s.own && !s.stale) return true;
+        if (!io.send(s.track, s.word, value)) return false;  // next pass
         s.sent = value, s.own = own, s.stale = false;
         s.ours = value != own;
+        return true;
     }
-    // Words driven or still to give back: a pass drives at most kMaxDrives,
-    // and those a lane let go wait here until given back.
-    Slot slots_[2 * kMaxDrives];
+    // Words driven or still to give back. kMaxDrives is every distinct word of
+    // every track that may be driven at all, so one slot each is enough for
+    // both: a word waiting to be given back is one that was driven.
+    Slot slots_[kMaxDrives];
 };
 }
