@@ -1,12 +1,13 @@
 # Variations
 
-A few bars of change over a song, for the OP-XY on OS 1.2.1.
+Adds variations to song mode to allow three lanes of assignable LFO like transitions 
+over time between scenes, but independent of the scene itself for the OP-XY on OS 1.2.1.
 
-Pin a variation to a join between two song entries and it plays a shaped move
-through the bars around it: tracks fade, break and build, or any of their
-sounds' controls rises, falls, swells or dips. The song itself is untouched —
-nothing is written into a pattern, and the variation plays only where it is
-pinned.
+Pin a variation between two song entries and it plays a shaped movement
+through the bars around it: tracks fade, break and build, rises, falls, 
+swells or dips. The song itself is untouched — nothing is written into a 
+pattern, and the variation plays only where it is pinned. It is freely
+movable, and can potentially run the length of a track.
 
 Built with the [Open-XY SDK](https://github.com/etcetc000/open-xy) and reaching
 the [builder](https://open-xy.com) through its catalog. It uses only the public
@@ -26,7 +27,7 @@ target on its own tracks:
 | **Drawn lines** | Any lane can be drawn by hand instead, up to 32 points, with a curve between each pair |
 | **Tracks** | Any of the eight instrument tracks; build and break stagger theirs, so they arrive one after another |
 
-Press **M4** on the song page to open the variation page over the join under
+Press **M4** on the song page to open the variation page between the scenes under
 the cursor: a timeline of the song with the window on it, the lanes' shapes,
 and the controls to move, shape and retarget them. Joins that hold a variation
 are marked on the song page itself, so you can see where they are without
