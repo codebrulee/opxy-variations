@@ -1,13 +1,13 @@
 # Variations
 
-Adds variations to song mode to allow three lanes of assignable LFO like transitions 
+Adds variations to song mode to allow three lanes of assignable LFO like transitions
 over time between scenes, but independent of the scene itself for the OP-XY on OS 1.2.1.
 
 Pin a variation between two song entries and it plays a shaped movement
-through the bars around it: tracks fade, break and build, rises, falls, 
-swells or dips. The song itself is untouched — nothing is written into a 
+through the bars around it: tracks fade, break and build, rises, falls,
+swells or dips. The song itself is untouched — nothing is written into a
 pattern, and the variation plays only where it is pinned. It is freely
-movable, and can potentially run the length of a track.
+movable, and can potentially run the length of a song.
 
 Built with the [Open-XY SDK](https://github.com/etcetc000/open-xy) and reaching
 the [builder](https://open-xy.com) through its catalog. It uses only the public
