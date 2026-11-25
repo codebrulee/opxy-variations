@@ -35,22 +35,29 @@ opening anything.
 
 ## Limits
 
-The ones you meet first, in the order you meet them:
+A **control** is one knob on one track: track 1's volume, track 3's cutoff. It
+is the unit the OP-XY moves things in, and the one the limits below count. A
+lane is one knob plus the tracks it moves, so a lane across all eight tracks is
+eight controls, and a variation using all three lanes across all eight tracks
+is 24.
 
 | | |
 | --- | --- |
 | Variations in a project | **64** |
 | Saved state | **8192 bytes**; an ordinary variation costs 30 |
-| Window length | 4096 steps (256 bars) |
+| Window length | 256 bars |
 | Joins a window may reach, each way | 95 |
 | Lanes a variation | 3 |
 | Points on a drawn line | 32 |
-| Words driven in one audio pass | **32**, the SDK's cap |
+| Controls moving at once | **32**, the OP-XY's own ceiling |
 
-The last one is worth knowing: one variation at three lanes across eight tracks
-asks for 24 of the 32 words a pass, so two overlapping variations can ask for
-more than the pass can send, and the excess is dropped without a sign. The
-others you will not reach by accident.
+Every limit but the last is one you would have to go looking for. The last one
+you can meet by accident, so it is worth knowing how.
+
+One variation asks for 24 controls at the very most, so on its own it always
+fits. But two variations over the same bars ask for both their sets at once —
+up to 48 between them, where only 32 can move. The sixteen over the ceiling do
+not move, and today nothing tells you: a fade you set up simply does not fade.
 
 ## Checks
 
